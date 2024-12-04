@@ -1,4 +1,4 @@
-# Functional Capslock
+# 更多功能 Capslock
 
 赋予 Capslock 键额外的功能.
 
