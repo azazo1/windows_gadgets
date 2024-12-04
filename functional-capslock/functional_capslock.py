@@ -1,5 +1,6 @@
 import enum
 import math
+import os
 import socket
 import traceback
 from typing import Optional
@@ -7,6 +8,7 @@ import pynput
 import pywinauto
 from screeninfo import get_monitors
 
+TEXT_EDITOR_EXE_PATH = "subl.exe"
 
 class Direction(enum.Enum):
     UP = -90
@@ -132,6 +134,9 @@ def focus_on_window(window):
     window.set_focus()
     pynput.mouse.Controller().position = get_window_center(window)
 
+def open_text_editor():
+    os.startfile(TEXT_EDITOR_EXE_PATH)
+
 
 def get_vk(key):
     if isinstance(key, pynput.keyboard.Key):
@@ -154,11 +159,11 @@ def win32_event_filter(msg, data):
     global caps_lock_pressing, pending_vk_code, lshift_pressing
     is_pressing = not bool(data.flags & (1 << 7))
     if pending_vk_code == data.vkCode:
-        if is_pressing:  # 取消重复事件.
+        if is_pressing:  # 取消长按产生的重复事件.
             if caps_lock_pressing:
                 listener.suppress_event()
             return
-        else:  # 消除方向键的松开事件.
+        else:  # 消除按键松开事件.
             pending_vk_code = None
             listener.suppress_event()
 
@@ -172,19 +177,19 @@ def win32_event_filter(msg, data):
             print(f"LShift: {is_pressing}")
         lshift_pressing = is_pressing
     elif (data.vkCode == get_vk(pynput.keyboard.Key.left)
-          or data.vkCode == get_vk(pynput.keyboard.KeyCode.from_vk(0x48))):  # h
+          or data.vkCode == 0x48):  # h
         if caps_lock_pressing and is_pressing:
             pending_vk_code = data.vkCode
             switch_to(Direction.LEFT)
             listener.suppress_event()
     elif (data.vkCode == get_vk(pynput.keyboard.Key.right)
-          or data.vkCode == get_vk(pynput.keyboard.KeyCode.from_vk(0x4c))):  # l
+          or data.vkCode == 0x4c):  # l
         if caps_lock_pressing and is_pressing:
             pending_vk_code = data.vkCode
             switch_to(Direction.RIGHT)
             listener.suppress_event()
     elif (data.vkCode == get_vk(pynput.keyboard.Key.up)
-          or data.vkCode == get_vk(pynput.keyboard.KeyCode.from_vk(0x4b))):  # k
+          or data.vkCode == 0x4b):  # k
         if caps_lock_pressing and lshift_pressing and is_pressing:
             # 鼠标滚轮功能.
             pynput.keyboard.Controller().release(
@@ -198,7 +203,7 @@ def win32_event_filter(msg, data):
             switch_to(Direction.UP)
             listener.suppress_event()
     elif (data.vkCode == get_vk(pynput.keyboard.Key.down)
-          or data.vkCode == get_vk(pynput.keyboard.KeyCode.from_vk(0x4a))):  # j
+          or data.vkCode == 0x4a):  # j
         if caps_lock_pressing and lshift_pressing and is_pressing:
             # 鼠标滚轮功能.
             pynput.keyboard.Controller().release(
@@ -210,6 +215,11 @@ def win32_event_filter(msg, data):
         elif caps_lock_pressing and is_pressing:
             pending_vk_code = data.vkCode
             switch_to(Direction.DOWN)
+            listener.suppress_event()
+    elif data.vkCode == 0x45: # e
+        if caps_lock_pressing and is_pressing:
+            pending_vk_code = data.vkCode
+            open_text_editor()
             listener.suppress_event()
 
 
