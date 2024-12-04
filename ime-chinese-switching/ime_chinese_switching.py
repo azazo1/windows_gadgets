@@ -1,4 +1,6 @@
+import logging
 import time
+import traceback
 
 import pynput.keyboard
 import uiautomation
@@ -101,15 +103,20 @@ def get_en_mode_button() -> uiautomation.Control:
 
 def main():
     controller = pynput.keyboard.Controller()
+    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                        level=logging.DEBUG)
     while True:
-        ime = get_ms_ch_ime_button()
-        en = get_en_mode_button()
-        if ime and en:
-            controller.press(pynput.keyboard.Key.ctrl_l)
-            time.sleep(0.1)
-            controller.release(pynput.keyboard.Key.ctrl_l)
-            print("switched")
-        time.sleep(0.4)
+        try:
+            ime = get_ms_ch_ime_button()
+            en = get_en_mode_button()
+            if ime and en:
+                controller.press(pynput.keyboard.Key.ctrl_l)
+                time.sleep(0.1)
+                controller.release(pynput.keyboard.Key.ctrl_l)
+                logging.info("switched")
+            time.sleep(0.4)
+        except Exception:
+            logging.error(traceback.format_exc())
 
 
 if __name__ == '__main__':
