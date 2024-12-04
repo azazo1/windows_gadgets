@@ -6,6 +6,7 @@ import traceback
 from typing import Optional
 import pynput
 import pywinauto
+import uiautomation
 from screeninfo import get_monitors
 
 TEXT_EDITOR_EXE_PATH = "subl.exe"
@@ -131,7 +132,8 @@ def switch_to(direction: Direction):
 
 
 def focus_on_window(window):
-    window.set_focus()
+    ctl = uiautomation.ControlFromHandle(window.handle)
+    ctl.SetFocus() # 这种获取焦点的方式不会改变窗口大小.
     pynput.mouse.Controller().position = get_window_center(window)
 
 def open_text_editor():
