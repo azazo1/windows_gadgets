@@ -1,6 +1,9 @@
 """
 参考自: https://github.com/PEMessage/im-select-imm/blob/imm/src/im-select-imm.cpp
 """
+import logging
+import traceback
+from pathlib import Path
 import ctypes
 import time
 import win32con
@@ -68,12 +71,19 @@ def switch_input_method(locale):
 
 
 def main():
+    logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+                        filename=f"{Path(__file__).stem}.log",
+                        level=logging.DEBUG)
+    logging.info("Script start")
     while True:
-        method = get_input_method()
-        mode = get_input_mode()
-        if method == 2052 and mode & 0x01 == 0:
-            switch_input_mode(1)
-        time.sleep(0.1)
+        try:
+            method = get_input_method()
+            mode = get_input_mode()
+            if method == 2052 and mode & 0x01 == 0:
+                switch_input_mode(1)
+            time.sleep(0.1)
+        except Exception:
+            logging.error(traceback.format_exc())
 
 
 if __name__ == '__main__':

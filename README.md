@@ -7,6 +7,7 @@
 
 - 更多功能:
     1. [更多功能 Capslock](functional-capslock/README.md)
+    2. [清理 PSReadLine 历史记录](remove-pwsh-history/README.md)
 - 应对 bug:
     1. [微软拼音输入法防止自动切换为英文](ime-chinese-switching/README.md)
 
