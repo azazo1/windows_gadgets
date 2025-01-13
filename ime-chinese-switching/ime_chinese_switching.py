@@ -11,6 +11,8 @@ import win32gui
 import win32process
 from win32api import GetKeyboardLayout, PostMessage, SendMessage
 
+IME_RESETTING = True
+
 # NI_CONTEXTUPDATED 查看 immdev.h 发现以下内容, 但是在 learn microsoft 文档中没有记录:
 IMC_SETCONVERSIONMODE = 0x0002
 IMC_SETSENTENCEMODE = 0x0004
@@ -70,17 +72,35 @@ def switch_input_method(locale):
     PostMessage(hwnd, win32con.WM_INPUTLANGCHANGEREQUEST, 0, locale)
 
 
+prev_foreground_window = win32gui.GetForegroundWindow()
+
+
+def ime_resetting():
+    """
+    当焦点窗口变化的时候, 重置输入法为英文输入法(1033).
+    """
+    global prev_foreground_window
+    foreground_window = win32gui.GetForegroundWindow()
+    if prev_foreground_window != foreground_window:
+        prev_foreground_window = foreground_window
+        switch_input_method(1033)
+        prev_foreground_window = foreground_window
+
+
 def main():
+    path = Path(__file__).resolve()
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-                        filename=f"{Path(__file__).stem}.log",
+                        filename=path.with_suffix(".log"),
                         level=logging.DEBUG)
-    logging.info("Script start")
+    logging.info(f"Script start: {path}")
     while True:
         try:
             method = get_input_method()
             mode = get_input_mode()
             if method == 2052 and mode & 0x01 == 0:
                 switch_input_mode(1)
+            if IME_RESETTING:
+                ime_resetting()
             time.sleep(0.1)
         except Exception:
             logging.error(traceback.format_exc())
