@@ -227,10 +227,17 @@ def win32_event_filter(msg, data):
 
 def main():
     global listener
-    with socket.create_server(('127.0.0.1', 23982)):  # 单一实例.
-        with pynput.keyboard.Listener(win32_event_filter=win32_event_filter) as listener:
-            listener.join()
-
+    try:
+        with socket.create_server(('127.0.0.1', 23982)):  # 单一实例.
+            with pynput.keyboard.Listener(win32_event_filter=win32_event_filter) as listener:
+                listener.join()
+    except Exception:
+        import traceback
+        from pathlib import Path
+        with open(Path(__file__).with_suffix(".log"), "a") as w:
+            w.write('\n')
+            w.write(time.asctime())
+            w.write(traceback.format_exc())
 
 if __name__ == '__main__':
     main()

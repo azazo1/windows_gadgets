@@ -12,6 +12,7 @@ import win32process
 from win32api import GetKeyboardLayout, PostMessage, SendMessage
 
 IME_RESETTING = True
+ESCAPE_SWITCHING = True
 
 # NI_CONTEXTUPDATED 查看 immdev.h 发现以下内容, 但是在 learn microsoft 文档中没有记录:
 IMC_SETCONVERSIONMODE = 0x0002
@@ -87,12 +88,22 @@ def ime_resetting():
         prev_foreground_window = foreground_window
 
 
+def register_escape_switching():
+    """
+    注册 Ctrl + [ 快捷键切换输入法.
+    """
+    import keyboard
+    keyboard.add_hotkey("ctrl+[", lambda: switch_input_method(1033))
+
+
 def main():
     path = Path(__file__).resolve()
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                         filename=path.with_suffix(".log"),
                         level=logging.DEBUG)
     logging.info(f"Script start: {path}")
+    if ESCAPE_SWITCHING:
+        register_escape_switching()
     while True:
         try:
             method = get_input_method()
