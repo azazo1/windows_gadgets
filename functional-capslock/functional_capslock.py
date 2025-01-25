@@ -3,6 +3,8 @@ import math
 import os
 import socket
 import traceback
+import time
+from pathlib import Path
 from typing import Optional
 import pynput
 import pywinauto
@@ -232,8 +234,6 @@ def main():
             with pynput.keyboard.Listener(win32_event_filter=win32_event_filter) as listener:
                 listener.join()
     except Exception:
-        import traceback
-        from pathlib import Path
         with open(Path(__file__).with_suffix(".log"), "a") as w:
             w.write('\n')
             w.write(time.asctime())
