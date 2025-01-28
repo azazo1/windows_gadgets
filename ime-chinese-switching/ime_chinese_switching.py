@@ -145,18 +145,28 @@ class Throttler:
         return self()
 
 
+def init_logging():
+    path = Path(__file__).resolve()
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    s_handler = logging.StreamHandler()
+    f_handler = logging.FileHandler(path.with_suffix(".log"))
+    s_handler.setFormatter(formatter)
+    f_handler.setFormatter(formatter)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(s_handler)
+    logger.addHandler(f_handler)
+
+
 def main():
     path = Path(__file__).resolve()
-    logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-                        filename=path.with_suffix(".log"),
-                        level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler())
+    init_logging()
     logging.info(f"Script start: {path}")
     logging.info("Restart checking...")
     restarter = Restarter()
     restarter.notify_restart()
     logging.info("Restart checked")
-    logging.info(f"Script running: {path}")
+    logging.info(f"Script running...")
     should_restart = Throttler(restarter.should_restart, 1)
 
     if ESCAPE_SWITCHING:
