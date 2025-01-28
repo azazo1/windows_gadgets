@@ -6,6 +6,8 @@ import traceback
 from pathlib import Path
 import ctypes
 import time
+from typing import Callable
+
 import win32con
 import win32gui
 import win32process
@@ -96,25 +98,85 @@ def register_escape_switching():
     keyboard.add_hotkey("ctrl+[", lambda: switch_input_method(1033))
 
 
+class Restarter:
+    FILE_LOCK = "restart.lock"
+
+    def __init__(self):
+        self.lock = Path(__file__).parent.joinpath(self.FILE_LOCK).resolve()
+
+    def clear_lock(self):
+        self.lock.unlink(missing_ok=True)
+
+    def should_restart(self):
+        with open(self.lock, "a+") as r:
+            r.seek(0)
+            if "restart" in r.read():
+                return True
+        return False
+
+    def notify_restart(self, timeout=10):
+        if not self.lock.exists():
+            self.lock.touch(exist_ok=True)
+            return
+        with open(self.lock, "w") as w:
+            w.write("restart")
+        start_time = time.time()
+        while time.time() - start_time < timeout and self.lock.exists():
+            time.sleep(0.3)
+
+
+class Throttler:
+    def __init__(self, func: Callable, interval: float, /, *args, **kwargs):
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+        self.interval = interval
+        self.last_time = 0
+
+    def __call__(self):
+        now = time.time()
+        if now - self.last_time >= self.interval:
+            rst = self.func(*self.args, **self.kwargs)
+            self.last_time = now
+            return rst
+        return None
+
+    def throttle(self):
+        return self()
+
+
 def main():
     path = Path(__file__).resolve()
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                         filename=path.with_suffix(".log"),
                         level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler())
     logging.info(f"Script start: {path}")
+    logging.info("Restart checking...")
+    restarter = Restarter()
+    restarter.notify_restart()
+    logging.info("Restart checked")
+    logging.info(f"Script running: {path}")
+    should_restart = Throttler(restarter.should_restart, 1)
+
     if ESCAPE_SWITCHING:
         register_escape_switching()
-    while True:
-        try:
-            method = get_input_method()
-            mode = get_input_mode()
-            if method == 2052 and mode & 0x01 == 0:
-                switch_input_mode(1)
-            if IME_RESETTING:
-                ime_resetting()
-            time.sleep(0.1)
-        except Exception:
-            logging.error(traceback.format_exc())
+    try:
+        while True:
+            try:
+                method = get_input_method()
+                mode = get_input_mode()
+                if method == 2052 and mode & 0x01 == 0:
+                    switch_input_mode(1)
+                if IME_RESETTING:
+                    ime_resetting()
+                if should_restart():
+                    break
+                time.sleep(0.1)
+            except Exception:
+                logging.error(traceback.format_exc())
+    finally:
+        restarter.clear_lock()
 
 
 if __name__ == '__main__':
