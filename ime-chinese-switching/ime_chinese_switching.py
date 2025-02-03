@@ -7,6 +7,8 @@ from pathlib import Path
 import ctypes
 import time
 from typing import Callable
+import sys
+import subprocess
 
 import win32con
 import win32gui
@@ -48,7 +50,7 @@ def switch_input_mode(mode):
         SendMessage(foreground_ime, win32con.WM_IME_CONTROL, IMC_SETCONVERSIONMODE, mode)
 
 
-def get_input_mode():
+def get_input_mode() -> int | None:
     """
     API: https://learn.microsoft.com/en-us/previous-versions/aa913780(v=msdn.10)
     对于 Microsoft 旧版中文输入法（Windows 10 及之前）:
@@ -158,6 +160,13 @@ def init_logging():
     logger.addHandler(f_handler)
 
 
+def self_restart():
+    if getattr(sys, "frozen", False):
+        subprocess.Popen([sys.executable, *sys.argv[1:]])
+    else:
+        subprocess.Popen([sys.executable, *sys.argv])
+
+
 def main():
     path = Path(__file__).resolve()
     init_logging()
@@ -185,6 +194,7 @@ def main():
                 time.sleep(0.1)
             except Exception:
                 logging.error(traceback.format_exc())
+                self_restart()
     finally:
         restarter.clear_lock()
 
