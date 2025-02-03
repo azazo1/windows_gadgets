@@ -165,6 +165,7 @@ def self_restart():
         subprocess.Popen([sys.executable, *sys.argv[1:]])
     else:
         subprocess.Popen([sys.executable, *sys.argv])
+    raise KeyboardInterrupt()
 
 
 def main():
