@@ -125,6 +125,8 @@ class Restarter:
         start_time = time.time()
         while time.time() - start_time < timeout and self.lock.exists():
             time.sleep(0.3)
+        with open(self.lock, "w"):
+            pass
 
 
 class Throttler:
