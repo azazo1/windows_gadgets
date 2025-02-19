@@ -116,7 +116,7 @@ class Restarter:
                 return True
         return False
 
-    def notify_restart(self, timeout=10):
+    def notify_restart(self, timeout=0.5):
         if not self.lock.exists():
             self.lock.touch(exist_ok=True)
             return
@@ -197,7 +197,7 @@ def main():
                 time.sleep(0.1)
             except Exception:
                 logging.error(traceback.format_exc())
-                self_restart()
+                # self_restart()
     finally:
         restarter.clear_lock()
 
