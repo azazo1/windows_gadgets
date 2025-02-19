@@ -2,3 +2,4 @@
 .idea
 @AutomationLog.txt
 *.log
+*.toml
