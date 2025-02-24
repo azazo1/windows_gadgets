@@ -40,13 +40,13 @@ def hasChPunc(content: str) -> Optional[tuple[int, int]]:
             return i, idx  # 字符在 map 中的位置, 字符在内容中的位置
     return None
 
-def wait_for_new_paste(interval=0.2):
+def wait_for_new_paste(interval=2):
     origin = pyperclip.paste()
     while True:
+        time.sleep(interval)
         new = pyperclip.paste()
         if new != origin:
             break
-        time.sleep(interval)
     return new
 
 def mainloop():
