@@ -1,2 +1,2 @@
 pywin32~=306
-keyboard~=0.13.5
+pynput~=1.7.7

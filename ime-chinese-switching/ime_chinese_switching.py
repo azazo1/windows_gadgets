@@ -96,8 +96,21 @@ def register_escape_switching():
     """
     注册 Ctrl + [ 快捷键切换输入法.
     """
-    import keyboard
-    keyboard.add_hotkey("ctrl+[", lambda: switch_input_method(1033))
+    from pynput import keyboard
+    from threading import Thread
+    
+    def on_activate():
+        switch_input_method(1033)
+    
+    def listen_hotkey():
+        with keyboard.GlobalHotKeys({
+            '<ctrl>+[': on_activate
+        }) as h:
+            h.join()
+    
+    # 启动热键监听线程
+    hotkey_thread = Thread(target=listen_hotkey, daemon=True)
+    hotkey_thread.start()
 
 
 class Restarter:
