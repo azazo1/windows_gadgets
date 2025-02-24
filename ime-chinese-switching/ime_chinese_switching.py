@@ -180,6 +180,7 @@ def main():
     logging.info("Restart checked")
     logging.info(f"Script running...")
     should_restart = Throttler(restarter.should_restart, 1)
+    ticker = Throttler(lambda: logging.info("Ticking"), 5)
 
     if ESCAPE_SWITCHING:
         register_escape_switching()
@@ -194,6 +195,7 @@ def main():
                     ime_resetting()
                 if should_restart():
                     break
+                ticker()
                 time.sleep(0.1)
             except Exception:
                 logging.error(traceback.format_exc())

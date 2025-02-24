@@ -1,6 +1,7 @@
 """
 此脚本把剪贴板中的中文标点替换为英文的标点加一个空格.
 """
+import time
 from typing import Optional
 
 import pyperclip
@@ -39,6 +40,14 @@ def hasChPunc(content: str) -> Optional[tuple[int, int]]:
             return i, idx  # 字符在 map 中的位置, 字符在内容中的位置
     return None
 
+def wait_for_new_paste(interval=0.2):
+    origin = pyperclip.paste()
+    while True:
+        new = pyperclip.paste()
+        if new != origin:
+            break
+        time.sleep(interval)
+    return new
 
 def mainloop():
     first = True
@@ -46,7 +55,7 @@ def mainloop():
         if first:
             rawContent = content = pyperclip.paste()
         else:
-            rawContent = content = pyperclip.waitForNewPaste()  # type: str
+            rawContent = content = wait_for_new_paste()
         first = False
         if not content:
             continue
