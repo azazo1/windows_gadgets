@@ -9,9 +9,14 @@ from typing import Optional
 import pynput
 import pywinauto
 import uiautomation
+import win32con
+import win32gui
+import win32process
 from screeninfo import get_monitors
+from win32api import GetKeyboardLayout
 
 TEXT_EDITOR_EXE_PATH = "subl.exe"
+
 
 class Direction(enum.Enum):
     UP = -90
@@ -135,8 +140,9 @@ def switch_to(direction: Direction):
 
 def focus_on_window(window):
     ctl = uiautomation.ControlFromHandle(window.handle)
-    ctl.SetFocus() # 这种获取焦点的方式不会改变窗口大小.
+    ctl.SetFocus()  # 这种获取焦点的方式不会改变窗口大小.
     pynput.mouse.Controller().position = get_window_center(window)
+
 
 def open_text_editor():
     os.startfile(TEXT_EDITOR_EXE_PATH)
@@ -151,6 +157,36 @@ def get_vk(key):
         return key.vk
     else:
         return None
+
+
+def get_input_method():
+    """
+    Returns:
+        - 1033 是英文输入法.
+        - 2052 是微软拼音输入法.
+    """
+    hwnd = win32gui.GetForegroundWindow()
+    if hwnd:
+        thread_id, _ = win32process.GetWindowThreadProcessId(hwnd)
+        # 获取当前线程的键盘布局 (HKL)
+        current_layout = GetKeyboardLayout(thread_id)
+        layout_id = current_layout & 0x0000FFFF
+        return layout_id
+    return None
+
+
+def switch_input_method(locale):
+    if locale < 0:
+        return
+    hwnd = win32gui.GetForegroundWindow()
+    win32gui.PostMessage(hwnd, win32con.WM_INPUTLANGCHANGEREQUEST, 0, locale)
+
+
+def switch_im():
+    if get_input_method() == 1033:
+        switch_input_method(2052)
+    else:
+        switch_input_method(1033)
 
 
 listener: Optional[pynput.keyboard.Listener] = None
@@ -174,7 +210,10 @@ def win32_event_filter(msg, data):
     if data.vkCode == get_vk(pynput.keyboard.Key.caps_lock):
         if caps_lock_pressing != is_pressing:
             print(f"Caps lock: {is_pressing}")
-        caps_lock_pressing = is_pressing
+            caps_lock_pressing = is_pressing
+            if not is_pressing and pending_vk_code is None:  # capslock 松开, 但是没有按下其他键, 相当于直接按下了 capslock.
+                print("Switch IME ")
+                switch_im()
         listener.suppress_event()
     elif data.vkCode == get_vk(pynput.keyboard.Key.shift_l):
         if lshift_pressing != is_pressing:
@@ -220,7 +259,7 @@ def win32_event_filter(msg, data):
             pending_vk_code = data.vkCode
             switch_to(Direction.DOWN)
             listener.suppress_event()
-    elif data.vkCode == 0x45: # e
+    elif data.vkCode == 0x45:  # e
         if caps_lock_pressing and is_pressing:
             pending_vk_code = data.vkCode
             open_text_editor()
@@ -238,6 +277,7 @@ def main():
             w.write('\n')
             w.write(time.asctime())
             w.write(traceback.format_exc())
+
 
 if __name__ == '__main__':
     main()
