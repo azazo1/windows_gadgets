@@ -65,6 +65,10 @@ def is_valid(desktop, window):
         return False
     rect = window.rectangle()
     center = get_center(rect)
+    if center[0] < START_X or center[0] > END_X:
+        return False
+    if center[1] < START_Y or center[1] > END_Y:
+        return False
     top_window = desktop.top_from_point(*(int(p) for p in center))
     if top_window != window:
         return False
