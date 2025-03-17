@@ -1,7 +1,9 @@
 """
 参考自: https://github.com/PEMessage/im-select-imm/blob/imm/src/im-select-imm.cpp
 """
+
 import logging
+import os
 import traceback
 from pathlib import Path
 import ctypes
@@ -47,7 +49,9 @@ def switch_input_mode(mode):
     foreground_window = win32gui.GetForegroundWindow()
     foreground_ime = ctypes.windll.imm32.ImmGetDefaultIMEWnd(foreground_window)
     if foreground_ime:
-        SendMessage(foreground_ime, win32con.WM_IME_CONTROL, IMC_SETCONVERSIONMODE, mode)
+        SendMessage(
+            foreground_ime, win32con.WM_IME_CONTROL, IMC_SETCONVERSIONMODE, mode
+        )
 
 
 def get_input_mode() -> int | None:
@@ -98,16 +102,14 @@ def register_escape_switching():
     """
     from pynput import keyboard
     from threading import Thread
-    
+
     def on_activate():
         switch_input_method(1033)
-    
+
     def listen_hotkey():
-        with keyboard.GlobalHotKeys({
-            '<ctrl>+[': on_activate
-        }) as h:
+        with keyboard.GlobalHotKeys({"<ctrl>+[": on_activate}) as h:
             h.join()
-    
+
     # 启动热键监听线程
     hotkey_thread = Thread(target=listen_hotkey, daemon=True)
     hotkey_thread.start()
@@ -164,7 +166,9 @@ class Throttler:
 
 def init_logging():
     path = Path(__file__).resolve()
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     s_handler = logging.StreamHandler()
     f_handler = logging.FileHandler(path.with_suffix(".log"))
     s_handler.setFormatter(formatter)
@@ -184,6 +188,7 @@ def self_restart():
 
 
 def main():
+    os.chdir(Path(__file__).parent)
     path = Path(__file__).resolve()
     init_logging()
     logging.info(f"Script start: {path}")
@@ -191,7 +196,7 @@ def main():
     restarter = Restarter()
     restarter.notify_restart()
     logging.info("Restart checked")
-    logging.info(f"Script running...")
+    logging.info("Script running...")
     should_restart = Throttler(restarter.should_restart, 1)
     ticker = Throttler(lambda: print(f"Ticking {time.asctime()}"), 5)
 
@@ -215,7 +220,3 @@ def main():
                 # self_restart()
     finally:
         restarter.clear_lock()
-
-
-if __name__ == '__main__':
-    main()

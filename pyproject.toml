@@ -1,0 +1,38 @@
+[project]
+name = "windows_gadgets"
+version = "0.1.0"
+description = "Some gadgets in Windows"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    # ali_ddns = [
+    "alibabacloud_alidns20150109==3.5.7",
+    "toml~=0.10.2",
+    "requests~=2.32",
+    # functional_capslock = [
+    "pynput~=1.7.7",
+    "uiautomation~=2.0.20",
+    "pywinauto~=0.6.8",
+    "screeninfo~=0.8.1",
+    "pywin32",
+    # ime_chinese_switching = [
+    "pywin32",
+    "pynput~=1.7.7",
+    # remove_pwsh_history = []
+    # replace_punctuation_with_en = [
+    "pyperclip~=1.9.0",
+]
+
+[project.scripts]
+aliddns = "ali_ddns.upload:main"
+fncaps = "functional_capslock.functional_capslock:main"
+imeswitch = "ime_chinese_switching.ime_chinese_switching:main"
+rmpwshhistory = "remove_pwsh_history.remove_pwsh_history:main"
+repunct = "replace_punctuation_with_en.replace_punctuation_with_en:main"
+
+[project.gui-scripts]
+galiddns = "ali_ddns.upload:main"
+gfncaps = "functional_capslock.functional_capslock:main"
+gimeswitch = "ime_chinese_switching.ime_chinese_switching:main"
+grmpwshhistory = "remove_pwsh_history.remove_pwsh_history:main"
+grepunct = "replace_punctuation_with_en.replace_punctuation_with_en:main"

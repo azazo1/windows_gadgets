@@ -2,4 +2,8 @@
 .idea
 @AutomationLog.txt
 *.log
-*.toml
+ali-ddns-config.toml
+dist
+.venv
+windows_gadgets.egg-info
+/build

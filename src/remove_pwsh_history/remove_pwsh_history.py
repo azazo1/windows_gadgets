@@ -12,7 +12,5 @@ def remove_history():
                 print(f"Removing {f}")
 
 def main():
+    os.chdir(Path(__file__).parent)
     remove_history()
-
-if __name__ == "__main__":
-    main()
