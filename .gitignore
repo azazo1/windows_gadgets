@@ -7,3 +7,4 @@ dist
 .venv
 windows_gadgets.egg-info
 /build
+__pycache__

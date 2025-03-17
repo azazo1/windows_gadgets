@@ -11,6 +11,7 @@
 git clone https://github.com/azazo1/windows_gadgets.git
 cd windows_gadgets
 uv tool install .
+# 有些工具需要填写配置文件, 如果希望配置文件就在仓库克隆下来的文件夹路径, 请使用: uv tool install -e .
 ```
 
 然后可以直接使用命令行启动对应的工具, 见 [pyproject.toml](pyproject.toml), 其中 g 开头的是不带命令行窗口的.
