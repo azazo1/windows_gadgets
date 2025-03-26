@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import sys
 import time
+import traceback
 
 import requests
 import toml
@@ -159,16 +160,19 @@ def main():
     os.chdir(Path(__file__).parent)
     global key_config
     try:
+        ip = get_public_ip()
         key_config = toml.load("ali-ddns-config.toml")
         routine = key_config.get("ROUTINE")
         if isinstance(routine, int) and routine > 0:
             last_time = 0
             while True:
-                if time.time() - last_time > routine:
+                new_ip = get_public_ip()
+                if time.time() - last_time > routine or new_ip != ip:
                     Sample.main()
                     print(f"更新成功！{time.asctime()}")
                     last_time = time.time()
-                time.sleep(1)
+                    ip = new_ip
+                time.sleep(10)
         else:
             Sample.main()
     except FileNotFoundError:
@@ -187,3 +191,6 @@ def main():
             )
         os.system("cmd /c echo 请修改ali-ddns-config.toml文件中的配置信息！ && pause")
         exit(1)
+    except Exception:
+        with open("error.txt", "w") as w:
+            w.write(traceback.format_exc())
