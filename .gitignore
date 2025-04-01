@@ -5,6 +5,7 @@
 ali-ddns-config.toml
 dist
 .venv
+*.txt
 windows_gadgets.egg-info
 /build
 __pycache__

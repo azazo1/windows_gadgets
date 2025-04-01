@@ -166,11 +166,13 @@ class Throttler:
 
 def init_logging():
     path = Path(__file__).resolve()
+    logfile = path.with_suffix(".log")
+    os.remove(logfile)
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
     s_handler = logging.StreamHandler()
-    f_handler = logging.FileHandler(path.with_suffix(".log"))
+    f_handler = logging.FileHandler(logfile)
     s_handler.setFormatter(formatter)
     f_handler.setFormatter(formatter)
     logger = logging.getLogger()
