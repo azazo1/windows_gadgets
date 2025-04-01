@@ -3,6 +3,7 @@
 @AutomationLog.txt
 *.log
 ali-ddns-config.toml
+guard_running_config.toml
 dist
 .venv
 *.txt

@@ -21,6 +21,9 @@ dependencies = [
     # remove_pwsh_history = []
     # replace_punctuation_with_en = [
     "pyperclip~=1.9.0",
+    # guard_running = [
+    # "toml",
+    "psutil>=7.0.0",
 ]
 
 [project.scripts]
@@ -29,6 +32,7 @@ fncaps = "functional_capslock.functional_capslock:main"
 imeswitch = "ime_chinese_switching.ime_chinese_switching:main"
 rmpwshhistory = "remove_pwsh_history.remove_pwsh_history:main"
 repunct = "replace_punctuation_with_en.replace_punctuation_with_en:main"
+guardrun = "guard_running.guard_running:main"
 
 [project.gui-scripts]
 galiddns = "ali_ddns.upload:main"
@@ -36,3 +40,8 @@ gfncaps = "functional_capslock.functional_capslock:main"
 gimeswitch = "ime_chinese_switching.ime_chinese_switching:main"
 grmpwshhistory = "remove_pwsh_history.remove_pwsh_history:main"
 grepunct = "replace_punctuation_with_en.replace_punctuation_with_en:main"
+gguardrun = "guard_running.guard_running:main"
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
