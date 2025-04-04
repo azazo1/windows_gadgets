@@ -24,6 +24,10 @@ dependencies = [
     # guard_running = [
     # "toml",
     "psutil>=7.0.0",
+    # forward_url_proxy = [
+    # requests
+    "pysocks>=1.7.1",
+    "flask>=3.1.0",
 ]
 
 [project.scripts]
@@ -33,6 +37,7 @@ imeswitch = "ime_chinese_switching.ime_chinese_switching:main"
 rmpwshhistory = "remove_pwsh_history.remove_pwsh_history:main"
 repunct = "replace_punctuation_with_en.replace_punctuation_with_en:main"
 guardrun = "guard_running.guard_running:main"
+forwardurlproxy = "forward_url_proxy.forward_url_proxy:main"
 
 [project.gui-scripts]
 galiddns = "ali_ddns.upload:main"
@@ -41,6 +46,7 @@ gimeswitch = "ime_chinese_switching.ime_chinese_switching:main"
 grmpwshhistory = "remove_pwsh_history.remove_pwsh_history:main"
 grepunct = "replace_punctuation_with_en.replace_punctuation_with_en:main"
 gguardrun = "guard_running.guard_running:main"
+gforwardurlproxy = "forward_url_proxy.forward_url_proxy:main"
 
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
