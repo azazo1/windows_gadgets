@@ -14,8 +14,10 @@ import win32gui
 import win32process
 from screeninfo import get_monitors
 from win32api import GetKeyboardLayout
+import shutil
 
 TEXT_EDITOR_EXE_PATH = "subl.exe"
+VSCODE_EXE_PATH = "code"
 
 
 class Direction(enum.Enum):
@@ -164,6 +166,17 @@ def open_text_editor():
     os.startfile(TEXT_EDITOR_EXE_PATH)
 
 
+def open_vscode():
+    path = shutil.which(VSCODE_EXE_PATH)
+    if not path:
+        return
+    path = Path(path)
+    if path.parent.name == "bin":
+        # look for code.exe instead of code.cmd
+        path = path.parent.parent / "Code.exe"
+    os.startfile(path)
+
+
 def get_vk(key):
     if isinstance(key, pynput.keyboard.Key):
         return key.value.vk
@@ -292,6 +305,12 @@ def win32_event_filter(msg, data):
             pending_vk_code = data.vkCode
             operations = True
             open_text_editor()
+            listener.suppress_event()
+    elif data.vkCode == 0x56:  # v
+        if caps_lock_pressing and is_pressing:
+            pending_vk_code = data.vkCode
+            operations = True
+            open_vscode()
             listener.suppress_event()
 
 
