@@ -165,7 +165,6 @@ def focus_on_window(window):
 def open_text_editor():
     os.startfile(TEXT_EDITOR_EXE_PATH)
 
-
 def open_vscode():
     path = shutil.which(VSCODE_EXE_PATH)
     if not path:
@@ -175,6 +174,14 @@ def open_vscode():
         # look for code.exe instead of code.cmd
         path = path.parent.parent / "Code.exe"
     os.startfile(path)
+
+
+def open_pwsh():
+    pwsh = shutil.which("pwsh") or "powershell"
+    curdir = os.curdir
+    os.chdir(os.path.expanduser("~"))
+    os.startfile(pwsh)
+    os.chdir(curdir)
 
 
 def get_vk(key):
@@ -311,6 +318,12 @@ def win32_event_filter(msg, data):
             pending_vk_code = data.vkCode
             operations = True
             open_vscode()
+            listener.suppress_event()
+    elif data.vkCode == 0x50:  # p
+        if caps_lock_pressing and is_pressing:
+            pending_vk_code = data.vkCode
+            operations = True
+            open_pwsh()
             listener.suppress_event()
 
 
