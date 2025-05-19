@@ -4,6 +4,7 @@
 
 import logging
 import os
+import queue
 import traceback
 from pathlib import Path
 import ctypes
@@ -96,19 +97,51 @@ def ime_resetting():
         prev_foreground_window = foreground_window
 
 
-def register_escape_switching():
+def register_escape_switching(q: queue.Queue):
     """
     注册 Ctrl + [ 快捷键切换输入法.
+
+    Params:
+        q: 触发队列
     """
     from pynput import keyboard
     from threading import Thread
 
     def on_activate():
-        switch_input_method(1033)
+        # switch_input_method(1033) # 不知道为什么失效了
+        q.put(None)
 
     def listen_hotkey():
-        with keyboard.GlobalHotKeys({"<ctrl>+[": on_activate}) as h:
-            h.join()
+        current_keys = set()
+
+        def on_press(key):
+            try:
+                current_keys.add(key.char)
+            except AttributeError:
+                current_keys.add(key)
+            check_hotkey()
+
+        def on_release(key):
+            try:
+                current_keys.remove(key.char)
+            except Exception:
+                try:
+                    current_keys.remove(key)
+                except Exception:
+                    pass
+
+        def check_hotkey():
+            if (
+                keyboard.Key.ctrl in current_keys
+                or keyboard.Key.ctrl_l in current_keys
+                or keyboard.Key.ctrl_r in current_keys
+            ) and ("[" in current_keys or "\x1b" in current_keys):
+                logging.info("Escape: switch to eng")
+                on_activate()
+
+        # 创建一个监听器
+        with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
+            listener.join()
 
     # 启动热键监听线程
     hotkey_thread = Thread(target=listen_hotkey, daemon=True)
@@ -201,9 +234,10 @@ def main():
     logging.info("Script running...")
     should_restart = Throttler(restarter.should_restart, 1)
     ticker = Throttler(lambda: print(f"Ticking {time.asctime()}"), 5)
+    esc_queue = queue.Queue()
 
     if ESCAPE_SWITCHING:
-        register_escape_switching()
+        register_escape_switching(esc_queue)
     try:
         while True:
             try:
@@ -213,6 +247,9 @@ def main():
                     switch_input_mode(1)
                 if IME_RESETTING:
                     ime_resetting()
+                if not esc_queue.empty():
+                    esc_queue.get()
+                    switch_input_method(1033)
                 if should_restart():
                     break
                 ticker()
